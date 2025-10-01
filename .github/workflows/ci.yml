@@ -4,10 +4,10 @@ on:
   pull_request:
     branches: [develop, qa, production]
   push:
-    branches: [qa, production]
+    branches: [develop, qa, production]
 
 jobs:
-  quality:
+  code-quality:
     name: Code Quality
     runs-on: ubuntu-latest
 
