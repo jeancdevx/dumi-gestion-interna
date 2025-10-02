@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Nunito } from 'next/font/google'
 
 import '@/styles/globals.css'
 
-const inter = Inter({
-  variable: '--font-inter',
+const nunito = Nunito({
+  variable: '--font-nunito',
   subsets: ['latin'],
   display: 'swap',
   weight: ['400', '700', '900']
@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='es'>
-      <body className={`${inter.className} antialiased`}>{children}</body>
+      <body className={`${nunito.className} antialiased`}>{children}</body>
     </html>
   )
 }
