@@ -81,4 +81,5 @@ export async function deleteSession(): Promise<void> {
   cookieStore.delete('sAccessToken')
   cookieStore.delete('sRefreshToken')
   cookieStore.delete('sFrontToken')
+  cookieStore.delete('anti-csrf')
 }

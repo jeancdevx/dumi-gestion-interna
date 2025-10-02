@@ -14,6 +14,20 @@ import { decrypt } from './session'
 export type UserRole = 'admin' | 'seller'
 
 /**
+ * User data structure from the API
+ */
+export interface User {
+  id: string
+  superTokensId: string
+  names: string
+  lastNames: string
+  email: string
+  roles: UserRole[]
+  createdAt: string
+  updatedAt: string
+}
+
+/**
  * Verify that the user is authenticated
  * This function is cached per request using React's cache
  * @returns Session data or redirects to /sign-in
@@ -38,21 +52,45 @@ export const verifySession = cache(async () => {
 })
 
 /**
- * Get user data (you can extend this to fetch from database)
+ * Get user data from the API
  * This function is cached per request
  */
-export const getUser = cache(async () => {
+export const getUser = cache(async (): Promise<User | null> => {
   const session = await verifySession()
 
   if (!session) return null
 
   try {
-    // Here you would fetch user data from your database
-    // For now, we return what we have in the session
+    const cookieStore = await cookies()
+    const accessToken = cookieStore.get('sAccessToken')?.value
+    const refreshToken = cookieStore.get('sRefreshToken')?.value
+    const frontToken = cookieStore.get('sFrontToken')?.value
+
+    const response = await fetch(
+      'https://dumi-dev.onrender.com/api/v1/employee/me',
+      {
+        headers: {
+          Cookie: `sAccessToken=${accessToken}; sRefreshToken=${refreshToken}; sFrontToken=${frontToken}`
+        }
+      }
+    )
+
+    if (!response.ok) {
+      console.error('Failed to fetch user data:', response.status)
+      return null
+    }
+
+    const userData = await response.json()
+
     return {
-      id: session.userId,
-      email: session.email,
-      role: session.role
+      id: userData.id,
+      superTokensId: userData.superTokensId,
+      names: userData.names,
+      lastNames: userData.lastNames,
+      email: userData.email,
+      roles: userData.roles as UserRole[],
+      createdAt: userData.createdAt,
+      updatedAt: userData.updatedAt
     }
   } catch (error) {
     console.error('Failed to fetch user:', error)
