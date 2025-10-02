@@ -1,5 +1,31 @@
-const EmployeeView = () => {
-  return <div>EmployeeView</div>
+import { getEmployees } from '@/modules/admin/server/queries'
+
+import { DataTable } from '@/components/data-table'
+
+import { columns } from '../components/columns'
+
+const EmployeeView = async () => {
+  const employeesData = await getEmployees()
+
+  if (
+    !employeesData ||
+    !employeesData.items ||
+    !Array.isArray(employeesData.items)
+  ) {
+    return (
+      <div className='flex flex-col items-center justify-center gap-y-4 py-12'>
+        <p className='text-muted-foreground text-sm'>
+          No se pudieron cargar los empleados
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className='mx-auto flex w-full max-w-7xl flex-col gap-y-4 px-4 pb-4 md:px-8'>
+      <DataTable columns={columns} data={employeesData.items} />
+    </div>
+  )
 }
 
 export { EmployeeView }
