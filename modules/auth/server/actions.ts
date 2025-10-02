@@ -30,7 +30,6 @@ export const signInAction = async (formData: FormData) => {
     }
   }
 
-  // Call API and set cookies
   let response: Response
   let result: SignInResponse
 
@@ -41,6 +40,7 @@ export const signInAction = async (formData: FormData) => {
         'Content-Type': 'application/json',
         rid: 'emailpassword'
       },
+      credentials: 'include',
       body: JSON.stringify({
         formFields: [
           { id: 'email', value: validatedData.data.email },
@@ -50,10 +50,6 @@ export const signInAction = async (formData: FormData) => {
     })
 
     result = await response.json()
-
-    console.log('API Response Status:', response.status)
-    console.log('API Response OK:', response.ok)
-    console.log('API Result:', result)
   } catch (error) {
     console.error('Network error:', error)
     return {
@@ -69,8 +65,12 @@ export const signInAction = async (formData: FormData) => {
     }
   }
 
-  // Set cookies from response
   const setCookieHeaders = response.headers.getSetCookie()
+
+  // Extract anti-csrf from response headers (not from cookies)
+  const antiCsrfFromHeader = response.headers.get('anti-csrf')
+  const frontTokenFromHeader = response.headers.get('front-token')
+
   if (setCookieHeaders && setCookieHeaders.length > 0) {
     const cookieStore = await cookies()
 
@@ -102,20 +102,36 @@ export const signInAction = async (formData: FormData) => {
             attributes.sameSite = sameSiteValue
           }
         } else if (trimmedAttr.toLowerCase().startsWith('path=')) {
-          attributes.path = trimmedAttr.split('=')[1]
+          attributes.path = '/'
         } else if (trimmedAttr.toLowerCase().startsWith('max-age=')) {
           attributes.maxAge = parseInt(trimmedAttr.split('=')[1])
+        } else if (trimmedAttr.toLowerCase().startsWith('expires=')) {
         }
       })
 
+      attributes.path = '/'
+
       cookieStore.set(name, value, attributes)
     })
+
+    if (antiCsrfFromHeader) {
+      cookieStore.set('anti-csrf', antiCsrfFromHeader, {
+        path: '/',
+        httpOnly: false,
+        sameSite: 'lax'
+      })
+    }
+
+    if (frontTokenFromHeader) {
+      cookieStore.set('sFrontToken', frontTokenFromHeader, {
+        path: '/',
+        httpOnly: false,
+        sameSite: 'lax'
+      })
+    }
   }
 
-  // Get user role
-  console.log('Getting user role...')
   const userRole = await getUserRole()
-  console.log('User role:', userRole)
 
   if (!userRole) {
     return {
@@ -124,10 +140,7 @@ export const signInAction = async (formData: FormData) => {
     }
   }
 
-  // Redirect to appropriate dashboard
   const redirectPath = getRedirectPathByRole(userRole)
-  console.log('Redirecting to:', redirectPath)
 
-  // redirect() throws NEXT_REDIRECT - this is intentional and should not be caught
   redirect(redirectPath)
 }
