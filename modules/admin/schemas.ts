@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const newEmployeeSchema = z.object({
+export const employeeSchema = z.object({
   firstName: z.string().min(1, 'El nombre es obligatorio').trim(),
   lastName: z.string().min(1, 'El apellido es obligatorio').trim(),
   email: z
@@ -12,9 +12,9 @@ export const newEmployeeSchema = z.object({
     .min(6, 'La contraseña debe tener al menos 6 caracteres')
 })
 
-export const updateEmployeeSchema = newEmployeeSchema.extend({
+export const updateEmployeeSchema = employeeSchema.extend({
   id: z.string()
 })
 
-export type NewEmployeeFormData = z.infer<typeof newEmployeeSchema>
+export type EmployeeFormData = z.infer<typeof employeeSchema>
 export type UpdateEmployeeFormData = z.infer<typeof updateEmployeeSchema>
