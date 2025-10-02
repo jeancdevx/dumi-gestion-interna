@@ -1,0 +1,133 @@
+'use server'
+
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+
+import { getRedirectPathByRole, getUserRole } from '@/lib/dal'
+
+import { signInSchema } from '../schemas'
+
+type SignInResponse = {
+  status: string
+  user?: {
+    id: string
+    email: string
+    timeJoined: number
+  }
+}
+
+export const signInAction = async (formData: FormData) => {
+  const validatedData = signInSchema.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password')
+  })
+
+  if (!validatedData.success) {
+    return {
+      success: false as const,
+      errors: validatedData.error.flatten().fieldErrors,
+      message: 'Validation failed'
+    }
+  }
+
+  // Call API and set cookies
+  let response: Response
+  let result: SignInResponse
+
+  try {
+    response = await fetch('https://dumi-dev.onrender.com/api/v1/auth/signin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        rid: 'emailpassword'
+      },
+      body: JSON.stringify({
+        formFields: [
+          { id: 'email', value: validatedData.data.email },
+          { id: 'password', value: validatedData.data.password }
+        ]
+      })
+    })
+
+    result = await response.json()
+
+    console.log('API Response Status:', response.status)
+    console.log('API Response OK:', response.ok)
+    console.log('API Result:', result)
+  } catch (error) {
+    console.error('Network error:', error)
+    return {
+      success: false as const,
+      message: 'Error de conexión. Por favor, verifica tu conexión a internet.'
+    }
+  }
+
+  if (!response.ok || result.status !== 'OK') {
+    return {
+      success: false as const,
+      message: 'Credenciales inválidas. Por favor, intenta de nuevo.'
+    }
+  }
+
+  // Set cookies from response
+  const setCookieHeaders = response.headers.getSetCookie()
+  if (setCookieHeaders && setCookieHeaders.length > 0) {
+    const cookieStore = await cookies()
+
+    setCookieHeaders.forEach(cookieString => {
+      const [cookiePart, ...attributesParts] = cookieString.split(';')
+      const [name, value] = cookiePart.trim().split('=')
+
+      const attributes: {
+        httpOnly?: boolean
+        secure?: boolean
+        sameSite?: 'strict' | 'lax' | 'none'
+        path?: string
+        maxAge?: number
+      } = {}
+
+      attributesParts.forEach(attr => {
+        const trimmedAttr = attr.trim()
+        if (trimmedAttr.toLowerCase() === 'httponly') {
+          attributes.httpOnly = true
+        } else if (trimmedAttr.toLowerCase() === 'secure') {
+          attributes.secure = true
+        } else if (trimmedAttr.toLowerCase().startsWith('samesite=')) {
+          const sameSiteValue = trimmedAttr.split('=')[1].toLowerCase()
+          if (
+            sameSiteValue === 'strict' ||
+            sameSiteValue === 'lax' ||
+            sameSiteValue === 'none'
+          ) {
+            attributes.sameSite = sameSiteValue
+          }
+        } else if (trimmedAttr.toLowerCase().startsWith('path=')) {
+          attributes.path = trimmedAttr.split('=')[1]
+        } else if (trimmedAttr.toLowerCase().startsWith('max-age=')) {
+          attributes.maxAge = parseInt(trimmedAttr.split('=')[1])
+        }
+      })
+
+      cookieStore.set(name, value, attributes)
+    })
+  }
+
+  // Get user role
+  console.log('Getting user role...')
+  const userRole = await getUserRole()
+  console.log('User role:', userRole)
+
+  if (!userRole) {
+    return {
+      success: false as const,
+      message: 'No se pudo determinar el rol del usuario.'
+    }
+  }
+
+  // Redirect to appropriate dashboard
+  const redirectPath = getRedirectPathByRole(userRole)
+  console.log('Redirecting to:', redirectPath)
+
+  // redirect() throws NEXT_REDIRECT - this is intentional and should not be caught
+  redirect(redirectPath)
+}
