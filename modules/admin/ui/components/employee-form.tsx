@@ -8,8 +8,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
 import {
-  NewEmployeeFormData,
-  newEmployeeSchema,
+  EmployeeFormData,
+  employeeSchema,
   UpdateEmployeeFormData
 } from '@/modules/admin/schemas'
 import {
@@ -45,8 +45,8 @@ const EmployeeForm = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
 
-  const form = useForm<NewEmployeeFormData>({
-    resolver: zodResolver(newEmployeeSchema),
+  const form = useForm<EmployeeFormData>({
+    resolver: zodResolver(employeeSchema),
     defaultValues: initialValues || {
       firstName: '',
       lastName: '',
@@ -57,7 +57,7 @@ const EmployeeForm = ({
 
   const isEdit = !!initialValues?.id
 
-  const onSubmit = async (data: NewEmployeeFormData) => {
+  const onSubmit = async (data: EmployeeFormData) => {
     setIsLoading(true)
     setErrorMessage(null)
 

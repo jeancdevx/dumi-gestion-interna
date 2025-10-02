@@ -3,10 +3,18 @@
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 
-import { newEmployeeSchema, updateEmployeeSchema } from '../schemas'
+import { employeeSchema, updateEmployeeSchema } from '../schemas'
 
 type CreateEmployeeResponse = {
-  status: string
+  status?: string
+  message?: string
+  id?: string
+  names?: string
+  lastNames?: string
+  email?: string
+  superTokensId?: string
+  createdAt?: string
+  updatedAt?: string
   user?: {
     id: string
     email: string
@@ -15,7 +23,15 @@ type CreateEmployeeResponse = {
 }
 
 type UpdateEmployeeResponse = {
-  status: string
+  status?: string
+  message?: string
+  id?: string
+  names?: string
+  lastNames?: string
+  email?: string
+  superTokensId?: string
+  createdAt?: string
+  updatedAt?: string
   user?: {
     id: string
     email: string
@@ -24,7 +40,7 @@ type UpdateEmployeeResponse = {
 }
 
 export const createEmployeeAction = async (formData: FormData) => {
-  const validatedData = newEmployeeSchema.safeParse({
+  const validatedData = employeeSchema.safeParse({
     firstName: formData.get('firstName'),
     lastName: formData.get('lastName'),
     email: formData.get('email'),
@@ -45,6 +61,12 @@ export const createEmployeeAction = async (formData: FormData) => {
   const refreshToken = cookieStore.get('sRefreshToken')?.value
   const frontToken = cookieStore.get('sFrontToken')?.value
 
+  // Try different possible anti-csrf cookie names
+  const antiCsrf =
+    cookieStore.get('sAntiCsrf')?.value ||
+    cookieStore.get('anti-csrf')?.value ||
+    cookieStore.get('st-anti-csrf')?.value
+
   if (!accessToken) {
     return {
       success: false as const,
@@ -52,18 +74,38 @@ export const createEmployeeAction = async (formData: FormData) => {
     }
   }
 
+  // Check if critical cookies are missing
+  if (!refreshToken || !frontToken) {
+    console.error('Missing critical SuperTokens cookies')
+    return {
+      success: false as const,
+      message: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.'
+    }
+  }
+
   let response: Response
   let result: CreateEmployeeResponse
 
   try {
+    // Build cookie string only with available cookies
+    const cookieParts = [`sAccessToken=${accessToken}`]
+    if (refreshToken) cookieParts.push(`sRefreshToken=${refreshToken}`)
+    if (frontToken) cookieParts.push(`sFrontToken=${frontToken}`)
+
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      Cookie: cookieParts.join('; ')
+    }
+
+    if (antiCsrf) {
+      headers['anti-csrf'] = antiCsrf
+    }
+
     response = await fetch(
       'https://dumi-dev.onrender.com/api/v1/admin/employees',
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: `sAccessToken=${accessToken}; sRefreshToken=${refreshToken}; sFrontToken=${frontToken}`
-        },
+        headers,
         body: JSON.stringify({
           email: validatedData.data.email,
           names: validatedData.data.firstName,
@@ -74,9 +116,6 @@ export const createEmployeeAction = async (formData: FormData) => {
     )
 
     result = await response.json()
-
-    console.log('Create Employee Response Status:', response.status)
-    console.log('Create Employee Response:', result)
   } catch (error) {
     console.error('Network error creating employee:', error)
     return {
@@ -85,15 +124,19 @@ export const createEmployeeAction = async (formData: FormData) => {
     }
   }
 
-  if (!response.ok || result.status !== 'OK') {
-    const errorMessage =
-      result.status === 'EMAIL_ALREADY_EXISTS_ERROR'
-        ? 'Este email ya está registrado.'
-        : 'No se pudo crear el empleado. Por favor, intenta de nuevo.'
+  // Check for successful creation (201) or update (200)
+  if (!response.ok) {
+    // Check if it's an email conflict error (usually 409)
+    if (response.status === 409 || result.message?.includes('email')) {
+      return {
+        success: false as const,
+        message: 'Este email ya está registrado.'
+      }
+    }
 
     return {
       success: false as const,
-      message: errorMessage
+      message: 'No se pudo crear el empleado. Por favor, intenta de nuevo.'
     }
   }
 
@@ -102,7 +145,7 @@ export const createEmployeeAction = async (formData: FormData) => {
   return {
     success: true as const,
     message: 'Empleado creado exitosamente.',
-    data: result.user
+    data: result
   }
 }
 
@@ -129,6 +172,12 @@ export const updateEmployeeAction = async (formData: FormData) => {
   const refreshToken = cookieStore.get('sRefreshToken')?.value
   const frontToken = cookieStore.get('sFrontToken')?.value
 
+  // Try different possible anti-csrf cookie names
+  const antiCsrf =
+    cookieStore.get('sAntiCsrf')?.value ||
+    cookieStore.get('anti-csrf')?.value ||
+    cookieStore.get('st-anti-csrf')?.value
+
   if (!accessToken) {
     return {
       success: false as const,
@@ -136,18 +185,38 @@ export const updateEmployeeAction = async (formData: FormData) => {
     }
   }
 
+  // Check if critical cookies are missing
+  if (!refreshToken || !frontToken) {
+    console.error('Missing critical SuperTokens cookies for update')
+    return {
+      success: false as const,
+      message: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.'
+    }
+  }
+
   let response: Response
   let result: UpdateEmployeeResponse
 
   try {
+    // Build cookie string only with available cookies
+    const cookieParts = [`sAccessToken=${accessToken}`]
+    if (refreshToken) cookieParts.push(`sRefreshToken=${refreshToken}`)
+    if (frontToken) cookieParts.push(`sFrontToken=${frontToken}`)
+
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      Cookie: cookieParts.join('; ')
+    }
+
+    if (antiCsrf) {
+      headers['anti-csrf'] = antiCsrf
+    }
+
     response = await fetch(
       `https://dumi-dev.onrender.com/api/v1/admin/employees/${validatedData.data.id}`,
       {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: `sAccessToken=${accessToken}; sRefreshToken=${refreshToken}; sFrontToken=${frontToken}`
-        },
+        headers,
         body: JSON.stringify({
           email: validatedData.data.email,
           names: validatedData.data.firstName,
@@ -158,9 +227,6 @@ export const updateEmployeeAction = async (formData: FormData) => {
     )
 
     result = await response.json()
-
-    console.log('Update Employee Response Status:', response.status)
-    console.log('Update Employee Response:', result)
   } catch (error) {
     console.error('Network error updating employee:', error)
     return {
@@ -169,15 +235,19 @@ export const updateEmployeeAction = async (formData: FormData) => {
     }
   }
 
-  if (!response.ok || result.status !== 'OK') {
-    const errorMessage =
-      result.status === 'EMAIL_ALREADY_EXISTS_ERROR'
-        ? 'Este email ya está registrado.'
-        : 'No se pudo actualizar el empleado. Por favor, intenta de nuevo.'
+  // Check for successful update (200)
+  if (!response.ok) {
+    // Check if it's an email conflict error (usually 409)
+    if (response.status === 409 || result.message?.includes('email')) {
+      return {
+        success: false as const,
+        message: 'Este email ya está registrado.'
+      }
+    }
 
     return {
       success: false as const,
-      message: errorMessage
+      message: 'No se pudo actualizar el empleado. Por favor, intenta de nuevo.'
     }
   }
 
@@ -186,6 +256,6 @@ export const updateEmployeeAction = async (formData: FormData) => {
   return {
     success: true as const,
     message: 'Empleado actualizado exitosamente.',
-    data: result.user
+    data: result
   }
 }
