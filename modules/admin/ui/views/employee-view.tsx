@@ -21,11 +21,7 @@ const EmployeeView = async () => {
     )
   }
 
-  return (
-    <div className='mx-auto flex w-full max-w-7xl flex-col gap-y-4 px-4 pb-4 md:px-8'>
-      <DataTable columns={columns} data={employeesData.items} />
-    </div>
-  )
+  return <DataTable columns={columns} data={employeesData.items} />
 }
 
 export { EmployeeView }
