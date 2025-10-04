@@ -62,16 +62,40 @@ export const getUser = cache(async (): Promise<User | null> => {
 
   try {
     const cookieStore = await cookies()
+
+    // Get all SuperTokens cookies
     const accessToken = cookieStore.get('sAccessToken')?.value
     const refreshToken = cookieStore.get('sRefreshToken')?.value
     const frontToken = cookieStore.get('sFrontToken')?.value
+    const antiCsrf =
+      cookieStore.get('anti-csrf')?.value || cookieStore.get('sAntiCsrf')?.value
+
+    if (!accessToken || !refreshToken || !frontToken) {
+      console.error('Missing required cookies for API call')
+      return null
+    }
+
+    // Build cookie header with all SuperTokens cookies
+    const cookieHeader = [
+      `sAccessToken=${accessToken}`,
+      `sRefreshToken=${refreshToken}`,
+      `sFrontToken=${frontToken}`
+    ].join('; ')
+
+    const headers: HeadersInit = {
+      Cookie: cookieHeader
+    }
+
+    // Add anti-csrf header if available (some endpoints may require it)
+    if (antiCsrf) {
+      headers['anti-csrf'] = antiCsrf
+    }
 
     const response = await fetch(
-      'https://dumi-dev.onrender.com/api/v1/employee/me',
+      'https://dumi-dev.onrender.com/api/v1/employees/me',
       {
-        headers: {
-          Cookie: `sAccessToken=${accessToken}; sRefreshToken=${refreshToken}; sFrontToken=${frontToken}`
-        }
+        headers,
+        cache: 'no-store'
       }
     )
 
