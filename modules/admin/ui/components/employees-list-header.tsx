@@ -15,14 +15,12 @@ const EmployeesListHeader = () => {
     <>
       <NewEmployeeDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
 
-      <div className='mx-auto flex w-full max-w-7xl flex-col gap-y-4 px-4 pb-4 md:px-8'>
-        <div className='flex items-center justify-between'>
-          <h5 className='text-xl font-semibold md:text-3xl'>Mis Empleados</h5>
+      <div className='flex items-center justify-between'>
+        <h5 className='text-xl font-semibold md:text-3xl'>Mis Empleados</h5>
 
-          <Button onClick={() => setIsDialogOpen(true)}>
-            Crear Empleado <PlusIcon />
-          </Button>
-        </div>
+        <Button onClick={() => setIsDialogOpen(true)}>
+          Crear Empleado <PlusIcon />
+        </Button>
       </div>
     </>
   )
