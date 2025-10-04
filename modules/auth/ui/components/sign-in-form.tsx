@@ -46,6 +46,13 @@ const SignInForm = () => {
 
       const result = await signInAction(formData)
 
+      // If result is undefined, it means redirect() was called successfully
+      // redirect() throws NEXT_REDIRECT which doesn't return a value
+      if (!result) {
+        // Redirect is happening, don't show error
+        return
+      }
+
       if (!result.success) {
         if ('errors' in result && result.errors) {
           const emailError = result.errors.email?.[0]
@@ -63,7 +70,18 @@ const SignInForm = () => {
           setErrorMessage(result.message)
         }
       }
-    } catch {
+    } catch (error) {
+      // Check if this is a Next.js redirect (which is expected)
+      if (error && typeof error === 'object' && 'digest' in error) {
+        const digest = (error as { digest?: string }).digest
+        // NEXT_REDIRECT errors have a digest that starts with NEXT_REDIRECT
+        if (digest?.startsWith('NEXT_REDIRECT')) {
+          // This is an expected redirect, don't show error
+          return
+        }
+      }
+
+      // For any other error, show the generic error message
       setErrorMessage(
         'Ocurrió un error inesperado. Por favor, intenta de nuevo.'
       )
