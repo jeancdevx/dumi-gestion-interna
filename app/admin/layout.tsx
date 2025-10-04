@@ -20,10 +20,10 @@ export default async function AdminLayout({
     <SidebarProvider>
       <AdminDashboardSidebar user={user} />
 
-      <div className='bg-muted flex min-h-svh w-screen flex-col gap-y-4'>
+      <div className='bg-muted flex min-h-svh w-full flex-1 flex-col overflow-hidden'>
         <DashboardNavbar />
 
-        {children}
+        <main className='flex-1 overflow-y-auto'>{children}</main>
       </div>
     </SidebarProvider>
   )
