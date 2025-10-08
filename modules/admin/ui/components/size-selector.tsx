@@ -19,7 +19,23 @@ interface SizeSelectorProps {
   disabled?: boolean
 }
 
-const AVAILABLE_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+const AVAILABLE_SIZES = [
+  '2',
+  '4',
+  '6',
+  '8',
+  '10',
+  '12',
+  '14',
+  '16',
+  'XS',
+  'S',
+  'M',
+  'L',
+  'XL',
+  'XXL',
+  'XXXL'
+]
 const AVAILABLE_GENDERS = [
   { value: 'hombre', label: 'Hombre' },
   { value: 'mujer', label: 'Mujer' },
