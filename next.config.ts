@@ -1,7 +1,11 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '30mb' // 5 images * 5MB each + form data
+    }
+  }
+}
 
-export default nextConfig;
+export default nextConfig
