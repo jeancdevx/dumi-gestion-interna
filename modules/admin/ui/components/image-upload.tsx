@@ -162,7 +162,6 @@ export const ImageUpload = ({
                   alt={`Preview ${index + 1}`}
                   className='h-full w-full object-cover'
                   onLoad={e => {
-                    // Cleanup object URL after image loads
                     URL.revokeObjectURL((e.target as HTMLImageElement).src)
                   }}
                 />
