@@ -7,6 +7,7 @@ import { OctagonAlertIcon } from 'lucide-react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
+import { createClothesAction } from '@/modules/admin/server/clothes-actions'
 import {
   GarmentFormData,
   garmentSchema,
@@ -49,7 +50,7 @@ const GarmentForm = ({
     defaultValues: initialValues || {
       name: '',
       price: 0,
-      description: '',
+      description: undefined,
       images: [],
       sizes: []
     }
@@ -62,17 +63,56 @@ const GarmentForm = ({
     setErrorMessage(null)
 
     try {
-      // TODO: Implementar la lógica de creación/actualización con Cloudflare R2
-      console.log('Form data:', data)
-      console.log('Images to upload:', data.images)
-      console.log('Sizes:', data.sizes)
+      // Create FormData to send to server action
+      const formData = new FormData()
 
-      // Simulación de éxito
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      formData.append('name', data.name)
+      formData.append('price', data.price.toString())
+      if (data.description && data.description.trim() !== '') {
+        formData.append('description', data.description.trim())
+      }
 
-      form.reset()
-      if (onSuccess) {
-        onSuccess()
+      // Add images to FormData
+      data.images.forEach((file, index) => {
+        formData.append(`image-${index}`, file)
+      })
+
+      // Add sizes as JSON string
+      formData.append('sizes', JSON.stringify(data.sizes))
+
+      // Call server action
+      const result = await createClothesAction(formData)
+
+      if (!result.success) {
+        if ('errors' in result && result.errors) {
+          const nameError = result.errors.name?.[0]
+          const priceError = result.errors.price?.[0]
+          const imagesError = result.errors.images?.[0]
+          const sizesError = result.errors.sizes?.[0]
+
+          if (nameError) {
+            form.setError('name', { message: nameError })
+          }
+          if (priceError) {
+            form.setError('price', { message: priceError })
+          }
+          if (imagesError) {
+            form.setError('images', { message: imagesError })
+          }
+          if (sizesError) {
+            form.setError('sizes', { message: sizesError })
+          }
+        }
+
+        if (result.message) {
+          setErrorMessage(result.message)
+        }
+      } else {
+        // Success!
+        form.reset()
+        if (onSuccess) {
+          onSuccess()
+        }
       }
     } catch (error) {
       console.error('Error submitting form:', error)
@@ -161,6 +201,11 @@ const GarmentForm = ({
                   disabled={isLoading}
                   rows={3}
                   {...field}
+                  value={field.value || ''}
+                  onChange={e => {
+                    const value = e.target.value
+                    field.onChange(value === '' ? undefined : value)
+                  }}
                 />
               </FormControl>
               <FormDescription className='text-xs'>
