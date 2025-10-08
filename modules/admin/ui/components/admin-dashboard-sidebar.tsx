@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-import { StarIcon, UsersIcon, WalletIcon } from 'lucide-react'
+import { BackpackIcon, StarIcon, UsersIcon, WalletIcon } from 'lucide-react'
 
 import type { User } from '@/lib/dal'
 import { cn } from '@/lib/utils'
@@ -28,6 +28,11 @@ const firstSection = [
     icon: UsersIcon,
     label: 'Empleados',
     href: '/admin/employees'
+  },
+  {
+    icon: BackpackIcon,
+    label: 'Prendas',
+    href: '/admin/clothes'
   },
   {
     icon: WalletIcon,

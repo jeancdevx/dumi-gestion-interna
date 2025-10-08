@@ -82,7 +82,7 @@ export const columns: ColumnDef<Employee>[] = [
     accessorKey: 'actions',
     header: 'Acciones',
     cell: ({ row }) => {
-      console.log(row.original)
+      // console.log(row.original)
 
       return (
         <DropdownMenu>
