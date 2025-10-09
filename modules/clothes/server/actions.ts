@@ -100,7 +100,7 @@ export const createClothesAction = async (formData: FormData) => {
       variants: validatedData.data.sizes.map(size => ({
         gender: getGenderApiValue(size.gender),
         size: getSizeApiValue(size.size),
-        additional: 0
+        additional: size.additional
       })),
       images: validatedData.data.images.map(file => ({
         filename: file.name,
