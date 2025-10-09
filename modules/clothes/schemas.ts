@@ -12,7 +12,12 @@ export const garmentSizeSchema = z.object({
   size: z.string().min(1, 'La talla es obligatoria'),
   gender: z.enum(['hombre', 'mujer', 'unisex'], {
     message: 'Selecciona un género válido'
-  })
+  }),
+  additional: z
+    .number({
+      message: 'El precio adicional debe ser un número válido'
+    })
+    .min(0, 'El precio adicional no puede ser negativo')
 })
 
 export const garmentSchema = z.object({
