@@ -251,7 +251,8 @@ const GarmentForm = ({
               </FormControl>
               <FormDescription className='text-xs'>
                 Agrega todas las tallas disponibles con su género
-                correspondiente
+                correspondiente. El precio adicional se sumará al precio base de
+                la prenda.
               </FormDescription>
               <FormMessage />
             </FormItem>
