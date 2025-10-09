@@ -5,6 +5,8 @@ import { cache } from 'react'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
+import { apiBaseUrl } from '@/db'
+
 import { decrypt } from './session'
 
 /**
@@ -91,13 +93,10 @@ export const getUser = cache(async (): Promise<User | null> => {
       headers['anti-csrf'] = antiCsrf
     }
 
-    const response = await fetch(
-      'https://dumi-dev.onrender.com/api/v1/employees/me',
-      {
-        headers,
-        cache: 'no-store'
-      }
-    )
+    const response = await fetch(`${apiBaseUrl}/employees/me`, {
+      headers,
+      cache: 'no-store'
+    })
 
     if (!response.ok) {
       console.error('Failed to fetch user data:', response.status)
