@@ -2,6 +2,9 @@ import { redirectIfAuthenticated } from '@/lib/dal'
 
 import { SignInView } from '@/modules/auth/ui/views'
 
+// Forzar renderizado dinámico porque verificamos autenticación con cookies
+export const dynamic = 'force-dynamic'
+
 export default async function SignInPage() {
   await redirectIfAuthenticated()
 

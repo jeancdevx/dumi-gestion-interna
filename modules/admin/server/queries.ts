@@ -30,7 +30,10 @@ export const getEmployees = cache(
         headers: {
           Cookie: `sAccessToken=${accessToken}; sRefreshToken=${refreshToken}; sFrontToken=${frontToken}`
         },
-        cache: 'no-store'
+        next: {
+          revalidate: 60, // Revalidar cada 60 segundos
+          tags: ['employees']
+        }
       })
 
       if (!response.ok) {
@@ -90,7 +93,10 @@ export const getCustomers = cache(
         headers: {
           Cookie: `sAccessToken=${accessToken}; sRefreshToken=${refreshToken}; sFrontToken=${frontToken}`
         },
-        cache: 'no-store'
+        next: {
+          revalidate: 60, // Revalidar cada 60 segundos
+          tags: ['customers']
+        }
       })
 
       if (!response.ok) {

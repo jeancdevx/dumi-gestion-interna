@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidateTag } from 'next/cache'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
@@ -132,6 +133,9 @@ export const signInAction = async (formData: FormData) => {
       message: 'No se pudo determinar el rol del usuario.'
     }
   }
+
+  // Invalidar caché de sesión después de autenticarse
+  revalidateTag('user-session')
 
   const redirectPath = getRedirectPathByRole(userRole)
 
