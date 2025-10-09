@@ -8,8 +8,10 @@ import { apiBaseUrl } from '@/db'
 
 import {
   ClothesItem,
+  Customer,
   Employee,
   GetClothesResponse,
+  GetCustomersResponse,
   GetEmployeesResponse
 } from '../types'
 
@@ -68,6 +70,62 @@ export const getEmployees = cache(
       }
     } catch (error) {
       console.error('Error fetching employees:', error)
+      return null
+    }
+  }
+)
+
+export const getCustomers = cache(
+  async (): Promise<GetCustomersResponse | null> => {
+    try {
+      const cookieStore = await cookies()
+      const accessToken = cookieStore.get('sAccessToken')?.value
+      const refreshToken = cookieStore.get('sRefreshToken')?.value
+      const frontToken = cookieStore.get('sFrontToken')?.value
+
+      if (!accessToken) {
+        console.error('No access token found')
+        return null
+      }
+
+      const response = await fetch(`${apiBaseUrl}/customer`, {
+        headers: {
+          Cookie: `sAccessToken=${accessToken}; sRefreshToken=${refreshToken}; sFrontToken=${frontToken}`
+        },
+        cache: 'no-store'
+      })
+
+      if (!response.ok) {
+        console.error('Failed to fetch customers:', response.status)
+        return null
+      }
+
+      const rawData = await response.json()
+
+      let customers: Customer[]
+
+      if (Array.isArray(rawData)) {
+        customers = rawData
+      } else if (rawData && Array.isArray(rawData.items)) {
+        customers = rawData.items
+      } else {
+        console.error('Invalid response structure:', rawData)
+        return {
+          items: [],
+          total: 0,
+          page: 1,
+          limit: 10
+        }
+      }
+
+      return {
+        items: customers,
+        total: rawData.total || customers.length,
+        page: rawData.page || 1,
+        limit: rawData.limit || customers.length
+      }
+    } catch (error) {
+      console.error('Error fetching customers:', error)
       return null
     }
   }
