@@ -102,6 +102,23 @@ export interface GetEmployeesResponse {
   limit: number
 }
 
+export interface Customer {
+  id: string
+  names: string
+  lastNames: string
+  phone: string
+  reference: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface GetCustomersResponse {
+  items: Customer[]
+  total: number
+  page: number
+  limit: number
+}
+
 export interface ClothesVariant {
   id: string
   clothesId: string
