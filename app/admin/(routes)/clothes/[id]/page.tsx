@@ -9,6 +9,8 @@ import { ClotheDetailView } from '@/modules/clothes/ui/views/clothe-detail-view'
 
 import { LoadingState } from '@/components/loading-state'
 
+export const dynamic = 'force-dynamic'
+
 interface ClothePageProps {
   params: Promise<{ id: string }>
 }
