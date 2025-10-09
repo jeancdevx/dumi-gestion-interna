@@ -7,8 +7,6 @@ import { ClothesView } from '@/modules/clothes/ui/views/clothes-view'
 
 import { LoadingState } from '@/components/loading-state'
 
-export const dynamic = 'force-dynamic'
-
 export default async function ClothesPage() {
   await requireRole('admin')
 
