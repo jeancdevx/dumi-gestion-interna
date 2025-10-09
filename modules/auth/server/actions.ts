@@ -3,18 +3,11 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
+import { apiBaseUrl } from '@/db'
 import { getRedirectPathByRole, getUserRole } from '@/lib/dal'
 
 import { signInSchema } from '../schemas'
-
-type SignInResponse = {
-  status: string
-  user?: {
-    id: string
-    email: string
-    timeJoined: number
-  }
-}
+import { SignInResponse } from '../types'
 
 export const signInAction = async (formData: FormData) => {
   const validatedData = signInSchema.safeParse({
@@ -34,7 +27,7 @@ export const signInAction = async (formData: FormData) => {
   let result: SignInResponse
 
   try {
-    response = await fetch('https://dumi-dev.onrender.com/api/v1/auth/signin', {
+    response = await fetch(`${apiBaseUrl}/auth/signin`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

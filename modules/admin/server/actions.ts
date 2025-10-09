@@ -3,41 +3,10 @@
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 
+import { apiBaseUrl } from '@/db'
+
 import { employeeSchema, updateEmployeeSchema } from '../schemas'
-
-type CreateEmployeeResponse = {
-  status?: string
-  message?: string
-  id?: string
-  names?: string
-  lastNames?: string
-  email?: string
-  superTokensId?: string
-  createdAt?: string
-  updatedAt?: string
-  user?: {
-    id: string
-    email: string
-    timeJoined: number
-  }
-}
-
-type UpdateEmployeeResponse = {
-  status?: string
-  message?: string
-  id?: string
-  names?: string
-  lastNames?: string
-  email?: string
-  superTokensId?: string
-  createdAt?: string
-  updatedAt?: string
-  user?: {
-    id: string
-    email: string
-    timeJoined: number
-  }
-}
+import { CreateEmployeeResponse, UpdateEmployeeResponse } from '../types'
 
 export const createEmployeeAction = async (formData: FormData) => {
   const validatedData = employeeSchema.safeParse({
@@ -101,19 +70,16 @@ export const createEmployeeAction = async (formData: FormData) => {
       headers['anti-csrf'] = antiCsrf
     }
 
-    response = await fetch(
-      'https://dumi-dev.onrender.com/api/v1/admin/employees',
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          email: validatedData.data.email,
-          names: validatedData.data.firstName,
-          lastNames: validatedData.data.lastName,
-          password: validatedData.data.password
-        })
-      }
-    )
+    response = await fetch(`${apiBaseUrl}/admin/employees`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        email: validatedData.data.email,
+        names: validatedData.data.firstName,
+        lastNames: validatedData.data.lastName,
+        password: validatedData.data.password
+      })
+    })
 
     result = await response.json()
   } catch (error) {
@@ -213,7 +179,7 @@ export const updateEmployeeAction = async (formData: FormData) => {
     }
 
     response = await fetch(
-      `https://dumi-dev.onrender.com/api/v1/admin/employees/${validatedData.data.id}`,
+      `${apiBaseUrl}/admin/employees/${validatedData.data.id}`,
       {
         method: 'PUT',
         headers,
