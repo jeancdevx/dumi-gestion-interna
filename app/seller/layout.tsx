@@ -5,6 +5,9 @@ import { SellerDashboardSidebar } from '@/modules/seller/ui/components/seller-da
 import { DashboardNavbar } from '@/components/dashboard-navbar'
 import { SidebarProvider } from '@/components/ui/sidebar'
 
+// Forzar renderizado dinámico porque usamos cookies para autenticación
+export const dynamic = 'force-dynamic'
+
 interface SellerPageProps {
   children: React.ReactNode
 }
