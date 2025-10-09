@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { ArrowLeft, ImageIcon } from 'lucide-react'
 
 import { ClothesDetail } from '@/modules/clothes/types'
+import { AddToCartSelector } from '@/modules/clothes/ui/components/add-to-cart-selector'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -169,6 +170,11 @@ const ClotheDetailView = ({ clothe }: ClotheDetailViewProps) => {
               </div>
             ))}
           </div>
+
+          <Separator />
+
+          {/* Agregar al carrito */}
+          <AddToCartSelector clothe={clothe} />
 
           <Separator />
 
