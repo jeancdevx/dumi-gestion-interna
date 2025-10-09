@@ -116,15 +116,8 @@ export const createClothesAction = async (formData: FormData) => {
       body.description = validatedData.data.description.trim()
     }
 
-    console.log('Request body:', JSON.stringify(body, null, 2))
-    console.log('Description value:', validatedData.data.description)
-    console.log(
-      'Description in body:',
-      'description' in body ? body.description : 'NOT IN BODY'
-    )
-
     // Create clothes and get pre-signed URLs
-    const response = await fetch(`${apiBaseUrl}/v1/clothes`, {
+    const response = await fetch(`${apiBaseUrl}/clothes`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
