@@ -81,7 +81,7 @@ export const createCustomerAction = async (formData: FormData) => {
     }
 
     // Create customer
-    const response = await fetch(`${apiBaseUrl}/customer`, {
+    const response = await fetch(`${apiBaseUrl}/customers`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
