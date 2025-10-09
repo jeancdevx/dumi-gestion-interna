@@ -23,7 +23,10 @@ export const getClothes = cache(
         headers: {
           Cookie: `sAccessToken=${accessToken}; sRefreshToken=${refreshToken}; sFrontToken=${frontToken}`
         },
-        cache: 'no-store'
+        next: {
+          revalidate: 60, // Revalidar cada 60 segundos
+          tags: ['clothes']
+        }
       })
 
       if (!response.ok) {
@@ -79,7 +82,10 @@ export const getClotheById = cache(
         headers: {
           Cookie: `sAccessToken=${accessToken}; sRefreshToken=${refreshToken}; sFrontToken=${frontToken}`
         },
-        cache: 'no-store'
+        next: {
+          revalidate: 60, // Revalidar cada 60 segundos
+          tags: ['clothes', `clothe-${id}`]
+        }
       })
 
       if (!response.ok) {

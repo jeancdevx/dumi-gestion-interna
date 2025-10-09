@@ -2,6 +2,9 @@ import { requireRole } from '@/lib/dal'
 
 import { EmployeeIdView } from '@/modules/admin/ui/views/employee-id-view'
 
+// Forzar renderizado dinámico porque usamos cookies para autenticación
+export const dynamic = 'force-dynamic'
+
 export default async function AdminEmployeeIdPage() {
   await requireRole('admin')
 

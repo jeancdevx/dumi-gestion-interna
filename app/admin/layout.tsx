@@ -5,6 +5,9 @@ import { AdminDashboardSidebar } from '@/modules/admin/ui/components/admin-dashb
 import { DashboardNavbar } from '@/components/dashboard-navbar'
 import { SidebarProvider } from '@/components/ui/sidebar'
 
+// Forzar renderizado dinámico porque usamos cookies para autenticación
+export const dynamic = 'force-dynamic'
+
 export default async function AdminLayout({
   children
 }: {

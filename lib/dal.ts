@@ -95,7 +95,10 @@ export const getUser = cache(async (): Promise<User | null> => {
 
     const response = await fetch(`${apiBaseUrl}/employees/me`, {
       headers,
-      cache: 'no-store'
+      next: {
+        revalidate: 30, // Revalidar cada 30 segundos (datos de sesión)
+        tags: ['user-session']
+      }
     })
 
     if (!response.ok) {
