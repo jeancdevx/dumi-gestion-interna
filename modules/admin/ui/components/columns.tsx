@@ -11,7 +11,7 @@ import {
 
 import { ColumnDef } from '@tanstack/react-table'
 
-import { Employee } from '@/modules/admin/server/queries'
+import { Employee } from '@/modules/admin/types'
 
 import { GeneratedAvatar } from '@/components/generated-avatar'
 import { Badge } from '@/components/ui/badge'
