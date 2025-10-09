@@ -2,7 +2,7 @@
 
 import { PlusIcon, Trash2Icon } from 'lucide-react'
 
-import { GarmentSizeFormData } from '@/modules/seller/schemas'
+import { GarmentSizeFormData } from '@/modules/clothes/schemas'
 
 import { Button } from '@/components/ui/button'
 import {
