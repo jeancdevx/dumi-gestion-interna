@@ -3,76 +3,12 @@
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 
+import { apiBaseUrl } from '@/db'
+
 import { garmentSchema } from '@/modules/seller/schemas'
 
-interface ClothesVariant {
-  clothesId: string
-  sizeId: string
-  genderId: string
-  additional: number
-  id: string
-}
-
-interface PreSignedPut {
-  key: string
-  putUrl: string
-  expiresAt: string
-  requiredHeaders: {
-    'Content-Type': string
-  }
-}
-
-interface CreateClothesResponse {
-  name: string
-  description: string
-  price: number
-  id: string
-  createdAt: string
-  updatedAt: string
-  variants: ClothesVariant[]
-  preSignedPuts: PreSignedPut[]
-}
-
-// Enums from backend
-export enum CLOTHES_SIZES {
-  TALLA_2 = '2',
-  TALLA_4 = '4',
-  TALLA_6 = '6',
-  TALLA_8 = '8',
-  TALLA_10 = '10',
-  TALLA_12 = '12',
-  TALLA_14 = '14',
-  TALLA_16 = '16',
-  XS = 'XS',
-  S = 'S',
-  M = 'M',
-  L = 'L',
-  XL = 'XL',
-  XXL = 'XXL',
-  XXXL = 'XXXL'
-}
-
-export enum CLOTHES_GENDER {
-  MALE = 'HOMBRE',
-  FEMALE = 'MUJER',
-  UNISEX = 'UNISEX'
-}
-
-// Helper to map size names to API format (now returns the enum value directly)
-const getSizeApiValue = (sizeName: string): string => {
-  // Just return the size as-is since it matches the enum values
-  return sizeName
-}
-
-// Helper to map gender to API format (uppercase)
-const getGenderApiValue = (genderName: string): string => {
-  const genderMap: Record<string, string> = {
-    hombre: CLOTHES_GENDER.MALE,
-    mujer: CLOTHES_GENDER.FEMALE,
-    unisex: CLOTHES_GENDER.UNISEX
-  }
-  return genderMap[genderName] || CLOTHES_GENDER.UNISEX
-}
+import { getGenderApiValue, getSizeApiValue } from '../helpers'
+import { CreateClothesResponse } from '../types'
 
 export const createClothesAction = async (formData: FormData) => {
   try {
@@ -173,7 +109,6 @@ export const createClothesAction = async (formData: FormData) => {
       }))
     }
 
-    // Only add description if it exists and is not empty
     if (
       validatedData.data.description &&
       validatedData.data.description.trim() !== ''
@@ -189,19 +124,16 @@ export const createClothesAction = async (formData: FormData) => {
     )
 
     // Create clothes and get pre-signed URLs
-    const response = await fetch(
-      'https://dumi-dev.onrender.com/api/v1/clothes',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Cookie: `sAccessToken=${accessToken}; sRefreshToken=${refreshToken}; sFrontToken=${frontToken}`,
-          'anti-csrf': antiCsrf
-        },
-        body: JSON.stringify(body),
-        cache: 'no-store'
-      }
-    )
+    const response = await fetch(`${apiBaseUrl}/v1/clothes`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `sAccessToken=${accessToken}; sRefreshToken=${refreshToken}; sFrontToken=${frontToken}`,
+        'anti-csrf': antiCsrf
+      },
+      body: JSON.stringify(body),
+      cache: 'no-store'
+    })
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
@@ -216,7 +148,6 @@ export const createClothesAction = async (formData: FormData) => {
 
     const clothesData: CreateClothesResponse = await response.json()
 
-    // Upload images to Cloudflare R2 using pre-signed URLs
     const uploadPromises = clothesData.preSignedPuts.map(
       async (preSignedPut, index) => {
         const file = validatedData.data.images[index]
@@ -256,7 +187,6 @@ export const createClothesAction = async (formData: FormData) => {
       )
     }
 
-    // Revalidate paths
     revalidatePath('/admin/clothes')
     revalidatePath('/seller/clothes')
 
