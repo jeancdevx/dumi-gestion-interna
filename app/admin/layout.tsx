@@ -1,5 +1,6 @@
 import { getUser } from '@/lib/dal'
 
+import { getCustomers } from '@/modules/admin/server/queries'
 import { AdminDashboardSidebar } from '@/modules/admin/ui/components/admin-dashboard-sidebar'
 
 import { DashboardNavbar } from '@/components/dashboard-navbar'
@@ -19,12 +20,15 @@ export default async function AdminLayout({
     return null
   }
 
+  const customersData = await getCustomers()
+  const customers = customersData?.items || []
+
   return (
     <SidebarProvider>
       <AdminDashboardSidebar user={user} />
 
       <div className='bg-muted flex min-h-svh w-full flex-1 flex-col overflow-hidden'>
-        <DashboardNavbar />
+        <DashboardNavbar customers={customers} />
 
         <main className='flex-1 overflow-y-auto'>{children}</main>
       </div>

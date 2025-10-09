@@ -7,9 +7,6 @@ import { EmployeeView } from '@/modules/admin/ui/views'
 
 import { LoadingState } from '@/components/loading-state'
 
-// Forzar renderizado dinámico porque usamos cookies para autenticación
-export const dynamic = 'force-dynamic'
-
 export default async function AdminEmployeesPage() {
   await requireRole('admin')
 
