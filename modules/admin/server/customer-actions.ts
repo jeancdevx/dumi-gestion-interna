@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { cookies } from 'next/headers'
 
 import { apiBaseUrl } from '@/db'
@@ -105,6 +105,8 @@ export const createCustomerAction = async (formData: FormData) => {
 
     const customerData = await response.json()
 
+    // Invalidar caché
+    revalidateTag('customers')
     revalidatePath('/admin/customers')
     revalidatePath('/seller/customers')
 
