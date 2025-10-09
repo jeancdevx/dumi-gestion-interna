@@ -97,3 +97,16 @@ export const getQuoteById = cache(async (id: string): Promise<Quote | null> => {
     return null
   }
 })
+
+export const getPendingQuotes = cache(async (): Promise<Quote[]> => {
+  try {
+    const quotesData = await getQuotes()
+    if (!quotesData) return []
+
+    // Filtrar solo las cotizaciones con estado PENDING
+    return quotesData.items.filter(quote => quote.status === 'PENDING')
+  } catch (error) {
+    console.error('Error fetching pending quotes:', error)
+    return []
+  }
+})

@@ -12,11 +12,36 @@ import { Quote } from '@/modules/quotes/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
-const statusMap = {
-  PENDING: { label: 'Pendiente', variant: 'secondary' as const },
-  APPROVED: { label: 'Aprobada', variant: 'default' as const },
-  REJECTED: { label: 'Rechazada', variant: 'destructive' as const },
-  COMPLETED: { label: 'Completada', variant: 'outline' as const }
+const getStatusBadge = (status: Quote['status']) => {
+  const statusConfig = {
+    PENDING: {
+      label: 'Pendiente',
+      className: 'bg-yellow-500 text-white hover:bg-yellow-600'
+    },
+    APPROVED: {
+      label: 'Aprobada',
+      className: 'bg-green-500 text-white hover:bg-green-600'
+    },
+    REJECTED: {
+      label: 'Rechazada',
+      className: 'bg-red-500 text-white hover:bg-red-600'
+    },
+    COMPLETED: {
+      label: 'Completada',
+      className: 'bg-blue-500 text-white hover:bg-blue-600'
+    }
+  }
+
+  const config = statusConfig[status] || {
+    label: status,
+    className: 'bg-gray-500 text-white'
+  }
+
+  return (
+    <Badge variant='outline' className={config.className}>
+      {config.label}
+    </Badge>
+  )
 }
 
 export const quotesColumns: ColumnDef<Quote>[] = [
@@ -79,16 +104,7 @@ export const quotesColumns: ColumnDef<Quote>[] = [
     accessorKey: 'status',
     header: 'Estado',
     cell: ({ row }) => {
-      const status = row.original.status
-      const statusInfo = statusMap[status]
-      return (
-        <Badge
-          variant={statusInfo.variant}
-          className='bg-yellow-600/80 text-xs font-semibold text-white'
-        >
-          {statusInfo.label}
-        </Badge>
-      )
+      return getStatusBadge(row.original.status)
     }
   },
   {
