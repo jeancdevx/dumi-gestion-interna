@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 
 import {
   BackpackIcon,
+  PackageIcon,
   StarIcon,
   UsersIcon,
   UserStarIcon,
@@ -49,6 +50,11 @@ const firstSection = [
     icon: WalletIcon,
     label: 'Cotizaciones',
     href: '/admin/quotes'
+  },
+  {
+    icon: PackageIcon,
+    label: 'Órdenes',
+    href: '/admin/orders'
   }
 ]
 
